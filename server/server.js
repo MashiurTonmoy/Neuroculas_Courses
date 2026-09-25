@@ -29,6 +29,11 @@ app.use(morgan('dev'))
 const limiter = rateLimit({ windowMs: 60*1000, max: 50 })
 app.use('/api/auth', limiter)
 
+// Health Check Route
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Neuroculas API is running successfully' });
+});
+
 // 5. Routes
 app.use('/api/auth',     require('./routes/authRoutes'))
 app.use('/api/users',    require('./routes/userRoutes'))

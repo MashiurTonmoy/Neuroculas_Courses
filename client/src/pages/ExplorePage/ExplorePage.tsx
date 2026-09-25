@@ -20,6 +20,8 @@ import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
 import { useExplorePage } from './useExplorePage';
 import { useUsersPage } from '../UsersPage/useUsersPage';
 import { CourseCard } from '../../components/CourseCard/CourseCard';
+import { EditCourseModal } from '../../components/EditCourseModal/EditCourseModal';
+import { Course } from '../../types/course';
 import { FilterBarPaper, SearchInputBox } from './ExplorePage.styles';
 import { colors } from '../../theme/theme';
 import { Tabs, Tab, Paper, Avatar } from '@mui/material';
@@ -28,6 +30,7 @@ import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 export const ExplorePage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState(0);
+  const [editingCourse, setEditingCourse] = React.useState<Course | null>(null);
   const {
     courses,
     loading,
@@ -43,6 +46,7 @@ export const ExplorePage: React.FC = () => {
     setPage,
     totalPages,
     user,
+    fetchCourses,
     handleDeleteCourse,
   } = useExplorePage();
 
@@ -248,12 +252,13 @@ export const ExplorePage: React.FC = () => {
                   {courses.map((course) => {
                     const currentUserId = user?._id || user?.id;
                     const ownerId = typeof course.owner === 'object' && course.owner !== null ? (course.owner._id || course.owner.id) : course.owner;
-                    const canDelete = Boolean(user && (user.role === 'admin' || currentUserId === ownerId));
+                    const canManage = Boolean(user && (user.role === 'admin' || currentUserId === ownerId));
                     return (
                       <Grid item xs={12} sm={6} md={4} key={course._id}>
                         <CourseCard
                           course={course}
-                          onDelete={canDelete ? handleDeleteCourse : undefined}
+                          onEdit={canManage ? (c) => setEditingCourse(c) : undefined}
+                          onDelete={canManage ? handleDeleteCourse : undefined}
                         />
                       </Grid>
                     );
@@ -418,6 +423,12 @@ export const ExplorePage: React.FC = () => {
             )}
           </>
         )}
+        <EditCourseModal
+          open={Boolean(editingCourse)}
+          course={editingCourse}
+          onClose={() => setEditingCourse(null)}
+          onSuccess={() => fetchCourses()}
+        />
       </Container>
     </Box>
   );

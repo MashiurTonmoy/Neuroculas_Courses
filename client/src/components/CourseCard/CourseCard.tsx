@@ -286,25 +286,6 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
             {/* Right: Action Buttons */}
             <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center', zIndex: 2 }}>
-              {onEdit && (
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(course);
-                  }}
-                  sx={{
-                    width: 34,
-                    height: 34,
-                    bgcolor: '#FFFFFF',
-                    color: '#0284C7',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.12)',
-                    '&:hover': { bgcolor: '#E0F2FE', color: '#0369A1' },
-                  }}
-                >
-                  <EditRoundedIcon sx={{ fontSize: 18 }} />
-                </IconButton>
-              )}
               {onDelete && (
                 <IconButton
                   size="small"

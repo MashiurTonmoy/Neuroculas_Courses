@@ -20,11 +20,14 @@ import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useDashboardPage } from './useDashboardPage';
 import { CourseCard } from '../../components/CourseCard/CourseCard';
 import { UploadModal } from '../../components/UploadModal/UploadModal';
+import { EditCourseModal } from '../../components/EditCourseModal/EditCourseModal';
+import { Course } from '../../types/course';
 import { DashboardTabPaper } from './DashboardPage.styles';
 import { colors } from '../../theme/theme';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const [editingCourse, setEditingCourse] = React.useState<Course | null>(null);
   const {
     user,
     tab,
@@ -184,6 +187,7 @@ export const DashboardPage: React.FC = () => {
                       <CourseCard
                         course={course}
                         showStatus
+                        onEdit={(c) => setEditingCourse(c)}
                         onDelete={handleDeleteCourse}
                       />
                     </Grid>
@@ -231,6 +235,13 @@ export const DashboardPage: React.FC = () => {
         open={uploadModalOpen}
         onClose={() => setUploadModalOpen(false)}
         onSuccess={() => { setUploadModalOpen(false); fetchDashboardData(); }}
+      />
+
+      <EditCourseModal
+        open={Boolean(editingCourse)}
+        course={editingCourse}
+        onClose={() => setEditingCourse(null)}
+        onSuccess={() => fetchDashboardData()}
       />
     </Box>
   );

@@ -13,7 +13,7 @@ const generateToken = (id) =>
 // -----------------------------------------------
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, about } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'User name, email and password are required' });
@@ -21,6 +21,7 @@ exports.register = async (req, res, next) => {
 
     const trimmedName = name.trim();
     const formattedEmail = email.toLowerCase().trim();
+    const trimmedAbout = about ? about.trim() : '';
 
     // Check duplicate username (case-insensitive)
     const nameExists = await User.findOne({
@@ -37,12 +38,20 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ message: 'Email already in use' });
     }
 
-    const user = await User.create({ name: trimmedName, email: formattedEmail, password });
+    const user = await User.create({ name: trimmedName, email: formattedEmail, password, about: trimmedAbout });
     const token = generateToken(user._id);
 
     res.status(201).json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar || '',
+        about: user.about || '',
+      }
     });
 
   } catch (err) {
@@ -75,7 +84,15 @@ exports.login = async (req, res, next) => {
 
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar || '',
+        about: user.about || '',
+      }
     });
 
   } catch (err) {

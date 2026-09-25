@@ -5,6 +5,7 @@ export interface User {
   email: string;
   role: 'user' | 'admin';
   avatar?: string;
+  about?: string;
 }
 
 export interface UserWithStats extends User {

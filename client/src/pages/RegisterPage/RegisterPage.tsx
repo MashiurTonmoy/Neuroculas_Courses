@@ -7,7 +7,20 @@ import { AuthCardPaper } from './RegisterPage.styles';
 import { colors } from '../../theme/theme';
 
 export const RegisterPage: React.FC = () => {
-  const { name, setName, email, setEmail, password, setPassword, loading, error, handleSubmit, navigate } = useRegisterPage();
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    about,
+    setAbout,
+    loading,
+    error,
+    handleSubmit,
+    navigate,
+  } = useRegisterPage();
 
   return (
     <Box
@@ -85,6 +98,17 @@ export const RegisterPage: React.FC = () => {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+
+          <TextField
+            label="About / Bio (Optional)"
+            placeholder="Tell the community a little about yourself..."
+            fullWidth
+            multiline
+            rows={2}
+            value={about}
+            onChange={(e) => setAbout(e.target.value)}
             sx={{ mb: 3 }}
           />
 

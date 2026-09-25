@@ -8,7 +8,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, about?: string) => Promise<void>;
+  updateUser: (updatedUser: User) => void;
   logout: () => void;
 }
 
@@ -29,12 +30,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('user', JSON.stringify(data.user));
   };
 
-  const register = async (name: string, email: string, password: string) => {
-    const data = await authService.register({ name, email, password });
+  const register = async (name: string, email: string, password: string, about?: string) => {
+    const data = await authService.register({ name, email, password, about });
     setToken(data.token);
     setUser(data.user);
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
+  };
+
+  const updateUser = (updatedUser: User) => {
+    setUser((prev) => {
+      const newUser = { ...prev, ...updatedUser };
+      localStorage.setItem('user', JSON.stringify(newUser));
+      return newUser;
+    });
   };
 
   const logout = () => {
@@ -48,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, isAdmin, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated, isAdmin, login, register, updateUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

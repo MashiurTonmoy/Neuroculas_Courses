@@ -8,6 +8,7 @@ export const useRegisterPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [about, setAbout] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +17,7 @@ export const useRegisterPage = () => {
     setError(null);
     try {
       setLoading(true);
-      await register(name, email, password);
+      await register(name, email, password, about);
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed');
@@ -32,6 +33,8 @@ export const useRegisterPage = () => {
     setEmail,
     password,
     setPassword,
+    about,
+    setAbout,
     loading,
     error,
     handleSubmit,

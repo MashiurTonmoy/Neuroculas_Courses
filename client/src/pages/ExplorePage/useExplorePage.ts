@@ -63,6 +63,7 @@ export const useExplorePage = () => {
     setPage,
     totalPages,
     user,
+    fetchCourses,
     handleDeleteCourse,
   };
 };

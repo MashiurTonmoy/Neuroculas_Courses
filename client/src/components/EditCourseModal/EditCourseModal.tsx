@@ -107,6 +107,15 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({
           border: '1.5px solid #BAE6FD',
           boxShadow: '0 20px 60px rgba(56, 189, 248, 0.20)',
           p: 1,
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+            width: 0,
+            height: 0,
+          },
         },
       }}
     >
@@ -143,7 +152,24 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({
       </DialogTitle>
 
       <form onSubmit={handleSubmit}>
-        <DialogContent sx={{ pt: 1, pb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <DialogContent
+          sx={{
+            pt: 1,
+            pb: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            maxHeight: 'calc(85vh - 130px)',
+            overflowY: 'auto',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            '&::-webkit-scrollbar': {
+              display: 'none',
+              width: 0,
+              height: 0,
+            },
+          }}
+        >
           {error && <Alert severity="error" sx={{ borderRadius: 3 }}>{error}</Alert>}
 
           {/* Title */}

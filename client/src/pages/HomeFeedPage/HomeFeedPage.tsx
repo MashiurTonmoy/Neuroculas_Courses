@@ -131,7 +131,7 @@ export const HomeFeedPage: React.FC = () => {
 
       {/* ══ HERO ══════════════════════════════════════════════════════════ */}
       <HeroContainer>
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
 
           {/* Logo mark */}
           <Box
@@ -176,15 +176,98 @@ export const HomeFeedPage: React.FC = () => {
               fontSize: { xs: '1.05rem', md: '1.2rem' },
               lineHeight: 1.7,
               fontWeight: 700,
-              maxWidth: 640,
+              maxWidth: 680,
               mx: 'auto',
-              mb: 4.5,
+              mb: 4,
             }}
           >
             <span style={{ color: '#1D4ED8' }}>Use AI to generate learning materials</span> on any topic and share them here.{' '}
             <span style={{ color: '#2563EB' }}>Discover, reuse, and refine</span> what the community has already built — so{' '}
             <span style={{ color: '#1D4ED8', textDecoration: 'underline decoration-2 decoration-sky-400' }}>no knowledge gets generated twice</span>.
           </Typography>
+
+          {/* 4 Sustainability Impact Tags */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                lg: 'repeat(4, 1fr)',
+              },
+              gap: 2,
+              mb: 4.5,
+              mt: 1,
+              maxWidth: 1160,
+              mx: 'auto',
+            }}
+          >
+            {sustainabilityMetrics.map((item) => (
+              <Box
+                key={item.title}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.75,
+                  px: 2.25,
+                  py: 1.5,
+                  bgcolor: colors.bgCard,
+                  borderRadius: 99,
+                  border: `1.5px solid ${colors.border}`,
+                  boxShadow: '0 4px 16px rgba(96, 165, 250, 0.08)',
+                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    transform: 'translateY(-3px)',
+                    boxShadow: '0 8px 24px rgba(96, 165, 250, 0.18)',
+                    borderColor: item.border,
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    bgcolor: item.bg,
+                    border: `1px solid ${item.border}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {item.icon}
+                </Box>
+                <Box sx={{ textAlign: 'left', minWidth: 0 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: { xs: '0.85rem', md: '0.9rem' },
+                      color: colors.textMain,
+                      lineHeight: 1.25,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {item.title}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: 'block',
+                      fontWeight: 500,
+                      fontSize: '0.74rem',
+                      color: colors.textSecondary,
+                      lineHeight: 1.2,
+                      mt: 0.25,
+                    }}
+                  >
+                    {item.subtitle}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+          </Box>
 
           {/* CTAs */}
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>

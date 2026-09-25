@@ -1,10 +1,11 @@
-const express     = require('express')
-const router      = express.Router()
-const multer      = require('multer')
-const protect     = require('../middleware/protect')
-const checkAccess = require('../middleware/checkAccess')
+const express      = require('express')
+const router       = express.Router()
+const multer       = require('multer')
+const protect      = require('../middleware/protect')
+const optionalAuth = require('../middleware/optionalAuth')
+const checkAccess  = require('../middleware/checkAccess')
 const {
-  getCourses, getCourse, createCourse, downloadCourse, deleteCourse,
+  getCourses, getCourse, createCourse, updateCourse, downloadCourse, deleteCourse,
   getMyPurchases, getMyUploads, enrollFree
 } = require('../controllers/courseController')
 
@@ -43,14 +44,15 @@ const handleUpload = (req, res, next) => {
 router.get('/my-purchases', protect, getMyPurchases)
 router.get('/my-uploads',   protect, getMyUploads)
 
-// Public routes
-router.get('/',    getCourses)   // GET /api/courses?q=react&lang=english
-router.get('/:id', getCourse)    // GET /api/courses/:id
+// Public / Optional Auth routes
+router.get('/',    optionalAuth, getCourses)   // GET /api/courses?q=react&lang=english
+router.get('/:id', optionalAuth, getCourse)    // GET /api/courses/:id
 
 // Protected routes (must be logged in)
-router.post('/',              protect, handleUpload, createCourse)
-router.get('/:id/download',   protect, checkAccess, downloadCourse)
+router.post('/',                protect, handleUpload, createCourse)
+router.put('/:id',              protect, handleUpload, updateCourse)
+router.get('/:id/download',     protect, checkAccess, downloadCourse)
 router.post('/:id/enroll-free', protect, enrollFree)
-router.delete('/:id',         protect, deleteCourse)
+router.delete('/:id',           protect, deleteCourse)
 
 module.exports = router

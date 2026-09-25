@@ -8,9 +8,12 @@ import {
   Alert,
   CircularProgress,
   MenuItem,
+  Grid,
 } from '@mui/material';
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import { useCreatePostPage } from './useCreatePostPage';
 import { FormCardPaper } from './CreatePostPage.styles';
 import { FileTypeIcon, getFileType, FILE_TYPE_CONFIG } from '../../components/FileTypeIcon/FileTypeIcon';
@@ -29,6 +32,8 @@ export const CreatePostPage: React.FC = () => {
     setLanguage,
     tags,
     setTags,
+    visibility,
+    setVisibility,
     file,
     handleFileChange,
     loading,
@@ -205,8 +210,71 @@ export const CreatePostPage: React.FC = () => {
               fullWidth
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              sx={{ mb: 4 }}
+              sx={{ mb: 3 }}
             />
+
+            {/* Visibility Selector */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="subtitle2" sx={{ color: colors.textMain, mb: 1, fontWeight: 700 }}>
+                Visibility Setting
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Box
+                    onClick={() => setVisibility('public')}
+                    sx={{
+                      p: 2,
+                      borderRadius: 3,
+                      border: '1.5px solid',
+                      borderColor: visibility === 'public' ? colors.primary : colors.border,
+                      bgcolor: visibility === 'public' ? colors.veryLight : '#FFFFFF',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <LanguageRoundedIcon sx={{ color: visibility === 'public' ? colors.primaryDark : colors.textSecondary }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 800, color: colors.textMain }}>
+                        Public
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: colors.textSecondary, display: 'block', fontSize: '0.72rem' }}>
+                        Visible to everyone
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box
+                    onClick={() => setVisibility('private')}
+                    sx={{
+                      p: 2,
+                      borderRadius: 3,
+                      border: '1.5px solid',
+                      borderColor: visibility === 'private' ? colors.primary : colors.border,
+                      bgcolor: visibility === 'private' ? colors.veryLight : '#FFFFFF',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <LockRoundedIcon sx={{ color: visibility === 'private' ? colors.primaryDark : colors.textSecondary }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 800, color: colors.textMain }}>
+                        Private
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: colors.textSecondary, display: 'block', fontSize: '0.72rem' }}>
+                        Only you &amp; admin
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
 
             <Button
               type="submit"

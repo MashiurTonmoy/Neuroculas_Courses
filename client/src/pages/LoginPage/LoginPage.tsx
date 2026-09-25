@@ -76,8 +76,24 @@ export const LoginPage: React.FC = () => {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            sx={{ mb: 3 }}
+            sx={{ mb: 1 }}
           />
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2.5 }}>
+            <Link
+              onClick={() => navigate('/forgot-password')}
+              sx={{
+                color: colors.primary,
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                textDecoration: 'none',
+                '&:hover': { textDecoration: 'underline' },
+              }}
+            >
+              Forgot Password?
+            </Link>
+          </Box>
 
           <Button
             type="submit"

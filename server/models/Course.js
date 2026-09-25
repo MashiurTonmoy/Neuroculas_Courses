@@ -8,6 +8,7 @@ const courseSchema = new mongoose.Schema({
   price:        { type: Number, default: 0 },       // 0 = free
   language: { type: String, default: 'English' },
   tags:         [{ type: String }],
+  visibility:   { type: String, enum: ['public', 'private'], default: 'public' },
   status:       { type: String, enum: ['pending','approved','rejected'], default: 'pending' },
   avgRating:    { type: Number, default: 0 },
   totalReviews: { type: Number, default: 0 },

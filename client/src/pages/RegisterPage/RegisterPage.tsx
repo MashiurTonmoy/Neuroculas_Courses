@@ -60,7 +60,7 @@ export const RegisterPage: React.FC = () => {
 
         <form onSubmit={handleSubmit}>
           <TextField
-            label="Full Name"
+            label="User Name"
             fullWidth
             required
             value={name}

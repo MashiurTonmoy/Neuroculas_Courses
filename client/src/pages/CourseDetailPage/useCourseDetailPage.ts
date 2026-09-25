@@ -126,6 +126,7 @@ export const useCourseDetailPage = () => {
     handleReviewSubmit,
     handleDeleteCourse,
     deleting,
+    fetchCourseDetails,
     isAuthenticated,
     user,
   };

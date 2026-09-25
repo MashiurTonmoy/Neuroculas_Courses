@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Typography, Box, Button, Grid, CircularProgress, Divider } from '@mui/material';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
@@ -14,6 +14,8 @@ import WaterDropRoundedIcon from '@mui/icons-material/WaterDropRounded';
 import { useNavigate } from 'react-router-dom';
 import { useHomeFeedPage } from './useHomeFeedPage';
 import { CourseCard } from '../../components/CourseCard/CourseCard';
+import { EditCourseModal } from '../../components/EditCourseModal/EditCourseModal';
+import { Course } from '../../types/course';
 import { HeroContainer, MissionBanner } from './HomeFeedPage.styles';
 import { colors } from '../../theme/theme';
 
@@ -120,7 +122,8 @@ const sustainabilityMetrics = [
 ];
 
 export const HomeFeedPage: React.FC = () => {
-  const { courses, loading, user, handleDeleteCourse } = useHomeFeedPage();
+  const { courses, loading, user, handleDeleteCourse, fetchTrendingCourses } = useHomeFeedPage();
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const navigate = useNavigate();
 
   return (
@@ -229,152 +232,7 @@ export const HomeFeedPage: React.FC = () => {
 
       <Container maxWidth="lg" sx={{ py: 8 }}>
 
-        {/* ══ AI MISSION BANNER ══════════════════════════════════════════ */}
-        <MissionBanner sx={{ mb: 4 }}>
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Box
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 1,
-                bgcolor: 'rgba(255,255,255,0.12)',
-                border: '1px solid rgba(255,255,255,0.20)',
-                borderRadius: 99,
-                px: 2,
-                py: 0.6,
-                mb: 2,
-              }}
-            >
-              <TipsAndUpdatesRoundedIcon sx={{ fontSize: 16, color: '#FFF' }} />
-              <Typography variant="caption" sx={{ color: '#FFF', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', fontSize: '0.7rem' }}>
-                Our Philosophy
-              </Typography>
-            </Box>
 
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 800,
-                color: '#FFF',
-                fontSize: { xs: '1.5rem', md: '2rem' },
-                mb: 1.5,
-                letterSpacing: '-0.5px',
-              }}
-            >
-              Smarter AI, Shared Knowledge
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                color: 'rgba(255,255,255,0.80)',
-                maxWidth: 620,
-                mx: 'auto',
-                lineHeight: 1.65,
-                fontSize: '0.97rem',
-              }}
-            >
-              Every AI-generated document costs real resources. We believe the best response
-              to that is not to stop using AI — but to <em>share what we create</em>, so the same
-              knowledge never has to be generated twice.
-            </Typography>
-          </Box>
-
-          <Grid container spacing={3}>
-            {missionCards.map((card) => (
-              <Grid item xs={12} md={4} key={card.title}>
-                <Box
-                  sx={{
-                    bgcolor: 'rgba(255,255,255,0.10)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    borderRadius: 4,
-                    p: 3,
-                    height: '100%',
-                    backdropFilter: 'blur(8px)',
-                    transition: 'background 0.2s ease',
-                    '&:hover': { bgcolor: 'rgba(255,255,255,0.16)' },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 3,
-                      bgcolor: 'rgba(255,255,255,0.15)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mb: 2,
-                    }}
-                  >
-                    {card.icon}
-                  </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#FFF', mb: 1, fontSize: '1rem' }}>
-                    {card.title}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.78)', lineHeight: 1.65 }}>
-                    {card.body}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-        </MissionBanner>
-
-        {/* ══ MODERN SUSTAINABILITY IMPACT SECTION ═══════════════════════ */}
-        <Grid container spacing={2.5} sx={{ mb: 8 }}>
-          {sustainabilityMetrics.map((metric) => (
-            <Grid item xs={12} sm={6} md={3} key={metric.title}>
-              <Box
-                sx={{
-                  bgcolor: colors.bgCard,
-                  borderRadius: 4,
-                  border: `1px solid ${colors.border}`,
-                  p: 3,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  height: '100%',
-                  boxShadow: '0 2px 10px rgba(96,165,250,0.06)',
-                  transition: 'transform 0.22s ease, box-shadow 0.22s ease',
-                  '&:hover': {
-                    transform: 'translateY(-3px)',
-                    boxShadow: '0 8px 24px rgba(96,165,250,0.14)',
-                    borderColor: colors.primaryLight,
-                  },
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '50%',
-                    bgcolor: metric.bg,
-                    border: `1px solid ${metric.border}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  {metric.icon}
-                </Box>
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ fontWeight: 800, color: colors.textMain, fontSize: '0.92rem', lineHeight: 1.25, mb: 0.3 }}
-                  >
-                    {metric.title}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: colors.textSecondary, fontSize: '0.75rem', lineHeight: 1.3, display: 'block' }}>
-                    {metric.subtitle}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-
-        <Divider sx={{ borderColor: colors.border, mb: 8 }} />
 
         {/* ══ TRENDING FEED ══════════════════════════════════════════════ */}
         <Box sx={{ mb: 8 }}>
@@ -448,12 +306,13 @@ export const HomeFeedPage: React.FC = () => {
               {courses.map((course) => {
                 const currentUserId = user?._id || user?.id;
                 const ownerId = typeof course.owner === 'object' && course.owner !== null ? (course.owner._id || course.owner.id) : course.owner;
-                const canDelete = Boolean(user && (user.role === 'admin' || currentUserId === ownerId));
+                const canManage = Boolean(user && (user.role === 'admin' || currentUserId === ownerId));
                 return (
                   <Grid item xs={12} sm={6} md={4} key={course._id}>
                     <CourseCard
                       course={course}
-                      onDelete={canDelete ? handleDeleteCourse : undefined}
+                      onEdit={canManage ? (c) => setEditingCourse(c) : undefined}
+                      onDelete={canManage ? handleDeleteCourse : undefined}
                     />
                   </Grid>
                 );
@@ -461,6 +320,14 @@ export const HomeFeedPage: React.FC = () => {
             </Grid>
           )}
         </Box>
+
+        {/* ══ EDIT COURSE MODAL ══════════════════════════════════════════ */}
+        <EditCourseModal
+          open={Boolean(editingCourse)}
+          course={editingCourse}
+          onClose={() => setEditingCourse(null)}
+          onSuccess={() => fetchTrendingCourses()}
+        />
 
       </Container>
     </Box>

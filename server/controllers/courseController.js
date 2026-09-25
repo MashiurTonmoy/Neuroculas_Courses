@@ -2,7 +2,6 @@
 const Course   = require('../models/Course')
 const Purchase = require('../models/Purchase')
 const cloudinary = require('cloudinary').v2
-
 const path = require('path')
 
 // Configure Cloudinary
@@ -14,14 +13,26 @@ cloudinary.config({
 
 // ----------------------------------------------------------
 // GET /api/courses?q=react&lang=english&price=free&sort=rating&page=1&limit=12
-// Public — browse and search approved courses (with pagination)
+// Public / Optional Auth — browse approved courses
 // ----------------------------------------------------------
 exports.getCourses = async (req, res, next) => {
   try {
     const { q, lang, price, sort, page = 1, limit = 12 } = req.query
 
-    // Start with only approved courses
+    // Start with approved courses
     let query = { status: 'approved' }
+
+    // Visibility filtering
+    if (!req.user || req.user.role !== 'admin') {
+      if (req.user) {
+        query.$or = [
+          { visibility: { $ne: 'private' } },
+          { owner: req.user._id }
+        ]
+      } else {
+        query.visibility = { $ne: 'private' }
+      }
+    }
 
     // Full-text search
     if (q) query.$text = { $search: q }
@@ -33,7 +44,7 @@ exports.getCourses = async (req, res, next) => {
     if (price === 'free') query.price = 0
     if (price === 'paid') query.price = { $gt: 0 }
 
-    // Count total matching docs (for pagination metadata)
+    // Count total matching docs
     const total = await Course.countDocuments(query)
 
     // Build the DB query with pagination
@@ -66,7 +77,7 @@ exports.getCourses = async (req, res, next) => {
 
 // ----------------------------------------------------------
 // GET /api/courses/:id
-// Public — get a single course by ID
+// Public / Optional Auth — get single course by ID
 // ----------------------------------------------------------
 exports.getCourse = async (req, res, next) => {
   try {
@@ -78,6 +89,20 @@ exports.getCourse = async (req, res, next) => {
       return next(err)
     }
 
+    // Check private visibility
+    if (course.visibility === 'private') {
+      const ownerId = course.owner ? (course.owner._id ? course.owner._id.toString() : course.owner.toString()) : ''
+      const userId = req.user ? req.user._id.toString() : ''
+      const isOwner = userId && ownerId === userId
+      const isAdmin = req.user && req.user.role === 'admin'
+
+      if (!isOwner && !isAdmin) {
+        const err = new Error('This material is private')
+        err.statusCode = 403
+        return next(err)
+      }
+    }
+
     res.json(course)
   } catch (err) {
     next(err)
@@ -86,17 +111,17 @@ exports.getCourse = async (req, res, next) => {
 
 // ----------------------------------------------------------
 // POST /api/courses
-// Protected — logged-in user uploads a course PDF
+// Protected — logged-in user uploads a course file
 // ----------------------------------------------------------
 exports.createCourse = async (req, res, next) => {
   try {
     if (!req.file) {
-      const err = new Error('Please upload a PDF file')
+      const err = new Error('Please upload a file')
       err.statusCode = 400
       return next(err)
     }
 
-    const { title, description, price, language, tags } = req.body
+    const { title, description, price, language, tags, visibility } = req.body
 
     if (!title || !description) {
       const err = new Error('Title and description are required')
@@ -104,7 +129,7 @@ exports.createCourse = async (req, res, next) => {
       return next(err)
     }
 
-    // Upload file buffer to Cloudinary as a raw file (PDF, DOCX, PPTX, ZIP, etc.)
+    // Upload file buffer to Cloudinary
     const ext = path.extname(req.file.originalname) || '.pdf'
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
@@ -126,10 +151,12 @@ exports.createCourse = async (req, res, next) => {
     if (tags) {
       parsedTags = Array.isArray(tags)
         ? tags
-        : tags.split(',').map((t) => t.trim()).filter(Boolean)
+        : typeof tags === 'string'
+          ? tags.split(',').map((t) => t.trim()).filter(Boolean)
+          : []
     }
 
-    // Create Course document (Auto-approved on upload)
+    // Create Course document
     const course = await Course.create({
       title,
       description,
@@ -138,6 +165,7 @@ exports.createCourse = async (req, res, next) => {
       price: Number(price) || 0,
       language: language || 'English',
       tags: parsedTags,
+      visibility: visibility === 'private' ? 'private' : 'public',
       status: 'approved',
     })
 
@@ -151,8 +179,76 @@ exports.createCourse = async (req, res, next) => {
 }
 
 // ----------------------------------------------------------
+// PUT /api/courses/:id
+// Protected — owner or admin can update all course fields & file
+// ----------------------------------------------------------
+exports.updateCourse = async (req, res, next) => {
+  try {
+    const course = await Course.findById(req.params.id)
+
+    if (!course) {
+      const err = new Error('Course not found')
+      err.statusCode = 404
+      return next(err)
+    }
+
+    const isOwner = course.owner.toString() === req.user._id.toString()
+    const isAdmin = req.user.role === 'admin'
+
+    if (!isOwner && !isAdmin) {
+      const err = new Error('Not authorized to edit this course')
+      err.statusCode = 403
+      return next(err)
+    }
+
+    const { title, description, price, language, tags, visibility } = req.body
+
+    // Handle document file replacement if uploaded
+    if (req.file) {
+      const ext = path.extname(req.file.originalname) || '.pdf'
+      const uploadResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: 'raw',
+            folder: 'course_marketplace',
+            public_id: `course_${Date.now()}${ext}`,
+          },
+          (error, result) => {
+            if (error) reject(error)
+            else resolve(result)
+          }
+        )
+        uploadStream.end(req.file.buffer)
+      })
+      course.fileUrl = uploadResult.secure_url
+    }
+
+    if (title !== undefined) course.title = title
+    if (description !== undefined) course.description = description
+    if (price !== undefined) course.price = Number(price) || 0
+    if (language !== undefined) course.language = language
+    if (visibility !== undefined) course.visibility = visibility === 'private' ? 'private' : 'public'
+
+    if (tags !== undefined) {
+      course.tags = Array.isArray(tags)
+        ? tags
+        : typeof tags === 'string'
+          ? tags.split(',').map((t) => t.trim()).filter(Boolean)
+          : course.tags
+    }
+
+    await course.save()
+
+    const updatedCourse = await Course.findById(course._id).populate('owner', 'name avatar email')
+    res.json({ message: 'Course updated successfully', course: updatedCourse })
+  } catch (err) {
+    next(err)
+  }
+}
+
+// ----------------------------------------------------------
 // GET /api/courses/:id/download
-// Protected + checkAccess — return the Cloudinary PDF URL
+// Protected + checkAccess — return Cloudinary file URL
 // ----------------------------------------------------------
 exports.downloadCourse = async (req, res, next) => {
   try {
@@ -172,7 +268,7 @@ exports.downloadCourse = async (req, res, next) => {
 
 // ----------------------------------------------------------
 // DELETE /api/courses/:id
-// Protected — only the course owner (or admin) can delete
+// Protected — course owner or admin can delete
 // ----------------------------------------------------------
 exports.deleteCourse = async (req, res, next) => {
   try {
@@ -202,7 +298,7 @@ exports.deleteCourse = async (req, res, next) => {
 
 // ----------------------------------------------------------
 // GET /api/courses/my-purchases
-// Protected — get all courses the logged-in user has purchased/enrolled
+// Protected — get courses logged-in user has purchased/enrolled
 // ----------------------------------------------------------
 exports.getMyPurchases = async (req, res, next) => {
   try {
@@ -213,7 +309,6 @@ exports.getMyPurchases = async (req, res, next) => {
       })
       .sort({ createdAt: -1 })
 
-    // Filter out any purchases where the course was deleted
     const courses = purchases
       .filter(p => p.course != null)
       .map(p => ({
@@ -230,7 +325,7 @@ exports.getMyPurchases = async (req, res, next) => {
 
 // ----------------------------------------------------------
 // GET /api/courses/my-uploads
-// Protected — get all courses uploaded by the logged-in user
+// Protected — get courses uploaded by logged-in user
 // ----------------------------------------------------------
 exports.getMyUploads = async (req, res, next) => {
   try {
@@ -245,7 +340,7 @@ exports.getMyUploads = async (req, res, next) => {
 
 // ----------------------------------------------------------
 // POST /api/courses/:id/enroll-free
-// Protected — enroll in a free course (creates Purchase record)
+// Protected — enroll in a free course
 // ----------------------------------------------------------
 exports.enrollFree = async (req, res, next) => {
   try {
@@ -269,7 +364,6 @@ exports.enrollFree = async (req, res, next) => {
       return next(err)
     }
 
-    // Check if already enrolled
     const existing = await Purchase.findOne({
       buyer: req.user._id,
       course: course._id,
@@ -278,7 +372,6 @@ exports.enrollFree = async (req, res, next) => {
       return res.json({ message: 'Already enrolled', alreadyEnrolled: true })
     }
 
-    // Create free enrollment record
     await Purchase.create({
       buyer:  req.user._id,
       course: course._id,

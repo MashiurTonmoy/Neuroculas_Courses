@@ -4,9 +4,10 @@ import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { theme } from './theme/theme';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { Navbar } from './components/Navbar/Navbar';
+import { Sidebar } from './components/Sidebar/Sidebar';
 import { Footer } from './components/Footer/Footer';
 import { ScrollToTop } from './components/ScrollToTop/ScrollToTop';
+import { VantaBackground } from './components/VantaBackground/VantaBackground';
 
 // Pages
 import { HomeFeedPage } from './pages/HomeFeedPage/HomeFeedPage';
@@ -15,6 +16,8 @@ import { UsersPage } from './pages/UsersPage/UsersPage';
 import { CourseDetailPage } from './pages/CourseDetailPage/CourseDetailPage';
 import { LoginPage } from './pages/LoginPage/LoginPage';
 import { RegisterPage } from './pages/RegisterPage/RegisterPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage/ResetPasswordPage';
 import { ProfileOverviewPage } from './pages/ProfileOverviewPage/ProfileOverviewPage';
 import { ProfileActivityPage } from './pages/ProfileActivityPage/ProfileActivityPage';
 import { MyLibraryPage } from './pages/MyLibraryPage/MyLibraryPage';
@@ -31,15 +34,16 @@ export const App: React.FC = () => {
       <AuthProvider>
         <Router>
           <ScrollToTop />
-          <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: '#F8FBFF' }}>
-            <Navbar />
+          <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'transparent', position: 'relative' }}>
+            <VantaBackground />
+            <Sidebar />
             <Box
               sx={{
                 flexGrow: 1,
-                backgroundImage: 'url(/assets/bg-pattern.png)',
-                backgroundRepeat: 'repeat',
-                backgroundSize: { xs: '100% auto', md: '720px auto' },
                 position: 'relative',
+                zIndex: 1,
+                pl: { xs: 0, md: '74px' },
+                pb: { xs: '66px', md: 0 },
               }}
             >
               <Routes>
@@ -55,6 +59,10 @@ export const App: React.FC = () => {
                 <Route path="/login" element={<LoginPage />} />
                 {/* 5. Register */}
                 <Route path="/register" element={<RegisterPage />} />
+                {/* Forgot Password */}
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                {/* Reset Password */}
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
                 {/* 6. Profile Overview */}
                 <Route path="/profile/:id" element={<ProfileOverviewPage />} />
                 {/* 7. Profile Activity Feed */}

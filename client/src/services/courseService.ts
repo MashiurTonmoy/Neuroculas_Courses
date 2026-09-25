@@ -21,6 +21,15 @@ export const courseService = {
     return res.data;
   },
 
+  async updateCourse(id: string, formData: FormData): Promise<{ message: string; course: Course }> {
+    const res = await api.put(`/courses/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  },
+
   async downloadCourse(id: string): Promise<{ fileUrl: string }> {
     const res = await api.get<{ fileUrl: string }>(`/courses/${id}/download`);
     return res.data;

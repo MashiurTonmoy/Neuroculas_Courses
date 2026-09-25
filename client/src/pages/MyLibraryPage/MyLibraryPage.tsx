@@ -15,8 +15,7 @@ import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import ShoppingBagRoundedIcon from '@mui/icons-material/ShoppingBagRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { useMyLibraryPage } from './useMyLibraryPage';
-import { LibraryCardPaper } from './MyLibraryPage.styles';
-import { FileTypeIcon } from '../../components/FileTypeIcon/FileTypeIcon';
+import { CourseCard } from '../../components/CourseCard/CourseCard';
 import { colors } from '../../theme/theme';
 
 export const MyLibraryPage: React.FC = () => {
@@ -97,88 +96,10 @@ export const MyLibraryPage: React.FC = () => {
           <Grid container spacing={2.5}>
             {courses.map((course) => (
               <Grid item xs={12} sm={6} md={4} key={course._id}>
-                <LibraryCardPaper elevation={0}>
-                  {/* File Icon + Info */}
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
-                    <FileTypeIcon fileUrl={course.fileUrl} variant="badge" size={48} />
-                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                      <Typography
-                        variant="subtitle2"
-                        sx={{
-                          fontWeight: 700,
-                          fontSize: '0.9rem',
-                          color: colors.textMain,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          lineHeight: 1.3,
-                          mb: 0.5,
-                        }}
-                      >
-                        {course.title}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-                        <Chip
-                          label="Enrolled"
-                          size="small"
-                          sx={{
-                            bgcolor: '#DCFCE7',
-                            color: '#15803D',
-                            fontWeight: 700,
-                            fontSize: '0.68rem',
-                            height: 20,
-                          }}
-                        />
-                        <Chip
-                          label={course.language}
-                          size="small"
-                          sx={{
-                            bgcolor: colors.soft,
-                            color: colors.primary,
-                            fontWeight: 600,
-                            fontSize: '0.68rem',
-                            height: 20,
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: colors.textSecondary,
-                      mb: 2.5,
-                      flexGrow: 1,
-                      lineHeight: 1.55,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                    }}
-                  >
-                    {course.description}
-                  </Typography>
-
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    startIcon={<DownloadRoundedIcon />}
-                    onClick={() => handleDownload(course._id, course.title)}
-                    sx={{
-                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
-                      color: '#FFF',
-                      fontWeight: 700,
-                      py: 1,
-                      '&:hover': { boxShadow: '0 6px 16px rgba(96,165,250,0.30)' },
-                    }}
-                  >
-                    Download File
-                  </Button>
-                </LibraryCardPaper>
+                <CourseCard
+                  course={course}
+                  onDownload={(c) => handleDownload(c._id, c.title)}
+                />
               </Grid>
             ))}
           </Grid>

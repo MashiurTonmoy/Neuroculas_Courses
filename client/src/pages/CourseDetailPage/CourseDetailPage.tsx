@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Container,
   Typography,
@@ -17,18 +17,23 @@ import { useNavigate } from 'react-router-dom';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import RateReviewRoundedIcon from '@mui/icons-material/RateReviewRounded';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import { useCourseDetailPage } from './useCourseDetailPage';
+import { EditCourseModal } from '../../components/EditCourseModal/EditCourseModal';
+import { Course } from '../../types/course';
 import { DetailPaper, ReviewPaper } from './CourseDetailPage.styles';
 import { FileTypeIcon, getFileType, FILE_TYPE_CONFIG } from '../../components/FileTypeIcon/FileTypeIcon';
 import { colors } from '../../theme/theme';
 
 export const CourseDetailPage: React.FC = () => {
   const navigate = useNavigate();
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const {
     course,
     reviews,
@@ -45,6 +50,7 @@ export const CourseDetailPage: React.FC = () => {
     handleReviewSubmit,
     handleDeleteCourse,
     deleting,
+    fetchCourseDetails,
     isAuthenticated,
     user,
   } = useCourseDetailPage();
@@ -216,23 +222,42 @@ export const CourseDetailPage: React.FC = () => {
                 </Button>
 
                 {user && (user.role === 'admin' || (user._id || user.id) === (typeof course.owner === 'object' && course.owner !== null ? (course.owner._id || course.owner.id) : course.owner)) && (
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    startIcon={<DeleteRoundedIcon />}
-                    disabled={deleting}
-                    onClick={handleDeleteCourse}
-                    sx={{
-                      borderColor: '#FECACA',
-                      color: colors.error,
-                      fontWeight: 700,
-                      px: 3,
-                      py: 1.5,
-                      '&:hover': { borderColor: colors.error, bgcolor: '#FEE2E2' },
-                    }}
-                  >
-                    {deleting ? <CircularProgress size={22} color="error" /> : 'Delete File'}
-                  </Button>
+                  <>
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      startIcon={<EditRoundedIcon />}
+                      onClick={() => setEditingCourse(course)}
+                      sx={{
+                        borderColor: '#BAE6FD',
+                        color: '#0284C7',
+                        fontWeight: 800,
+                        px: 3,
+                        py: 1.5,
+                        bgcolor: '#F0F9FF',
+                        '&:hover': { borderColor: '#38BDF8', bgcolor: '#E0F2FE' },
+                      }}
+                    >
+                      Edit Material
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      startIcon={<DeleteRoundedIcon />}
+                      disabled={deleting}
+                      onClick={handleDeleteCourse}
+                      sx={{
+                        borderColor: '#FECACA',
+                        color: colors.error,
+                        fontWeight: 700,
+                        px: 3,
+                        py: 1.5,
+                        '&:hover': { borderColor: colors.error, bgcolor: '#FEE2E2' },
+                      }}
+                    >
+                      {deleting ? <CircularProgress size={22} color="error" /> : 'Delete File'}
+                    </Button>
+                  </>
                 )}
               </Box>
             </Grid>
@@ -354,6 +379,15 @@ export const CourseDetailPage: React.FC = () => {
             </DetailPaper>
           </Grid>
         </Grid>
+
+        {/* ══ EDIT COURSE MODAL ══════════════════════════════════════════ */}
+        <EditCourseModal
+          open={Boolean(editingCourse)}
+          course={editingCourse}
+          onClose={() => setEditingCourse(null)}
+          onSuccess={() => fetchCourseDetails()}
+        />
+
       </Container>
     </Box>
   );

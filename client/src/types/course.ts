@@ -9,6 +9,7 @@ export interface Course {
   price: number;
   language: string;
   tags: string[];
+  visibility?: 'public' | 'private';
   status: 'pending' | 'approved' | 'rejected';
   avgRating: number;
   totalReviews: number;

@@ -39,5 +39,6 @@ export const useHomeFeedPage = () => {
     loading,
     user,
     handleDeleteCourse,
+    fetchTrendingCourses,
   };
 };

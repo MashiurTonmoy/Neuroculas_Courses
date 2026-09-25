@@ -11,27 +11,43 @@ connectDB()
 
 // 1. CORS — must be FIRST
 app.use(cors({
-  origin:         [process.env.CLIENT_URL || 'http://localhost:5173', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, or Postman)
+    if (!origin) return callback(null, true);
+
+    const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : '';
+
+    if (
+      origin === clientUrl ||
+      origin.endsWith('.netlify.app') ||
+      origin.includes('localhost')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials:    true,
   methods:        ['GET','POST','PUT','PATCH','DELETE'],
   allowedHeaders: ['Content-Type','Authorization']
 }))
 
-
-
-// 2. Body parser — before routes read req.body
+// Body parser — before routes read req.body
 app.use(express.json())
 
-// 3. Logger
+// Logger
 app.use(morgan('dev'))
 
-// 4. Rate limiter — protects auth routes
+// Rate limiter — protects auth routes
 const limiter = rateLimit({ windowMs: 60*1000, max: 50 })
 app.use('/api/auth', limiter)
 
-// Health Check Route
+// Health Check Routes
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Neuroculas API is running successfully' });
+});
+
+app.get('/api', (req, res) => {
+  res.status(200).json({ message: 'Neuroculas API endpoint active' });
 });
 
 // 5. Routes

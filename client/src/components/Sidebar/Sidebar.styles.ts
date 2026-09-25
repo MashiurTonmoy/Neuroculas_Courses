@@ -43,9 +43,14 @@ export const MobileBottomNavContainer = styled(Box)(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-around',
-  paddingLeft: '8px',
-  paddingRight: '8px',
+  paddingLeft: '4px',
+  paddingRight: '4px',
   zIndex: 1100,
+  overflowX: 'auto',
+  WebkitOverflowScrolling: 'touch',
+  '&::-webkit-scrollbar': {
+    display: 'none',
+  },
   [theme.breakpoints.up('md')]: {
     display: 'none',
   },

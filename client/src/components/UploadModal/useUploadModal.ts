@@ -7,6 +7,7 @@ export const useUploadModal = (onSuccess?: () => void) => {
   const [price, setPrice] = useState('0');
   const [language, setLanguage] = useState('English');
   const [tags, setTags] = useState('');
+  const [visibility, setVisibility] = useState<'public' | 'private'>('public');
   const [file, setFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
@@ -63,6 +64,7 @@ export const useUploadModal = (onSuccess?: () => void) => {
       formData.append('price', '0'); // Strict free price 0 BDT
       formData.append('language', language);
       formData.append('tags', tags);
+      formData.append('visibility', visibility);
       formData.append('document', file);
 
       const res = await courseService.createCourse(formData);
@@ -74,6 +76,7 @@ export const useUploadModal = (onSuccess?: () => void) => {
       setPrice('0');
       setFile(null);
       setTags('');
+      setVisibility('public');
 
       if (onSuccess) {
         setTimeout(() => {
@@ -99,6 +102,8 @@ export const useUploadModal = (onSuccess?: () => void) => {
     setLanguage,
     tags,
     setTags,
+    visibility,
+    setVisibility,
     file,
     setFile,
     handleFileChange,

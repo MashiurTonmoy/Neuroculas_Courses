@@ -49,11 +49,9 @@ export const Sidebar: React.FC = () => {
     { label: 'Explore', path: '/explore', icon: <ExploreRoundedIcon sx={{ fontSize: 22 }} /> },
     { label: 'Users', path: '/users', icon: <GroupRoundedIcon sx={{ fontSize: 22 }} /> },
     ...(isAuthenticated
-      ? [
-          { label: 'Library', path: '/library', icon: <LocalLibraryRoundedIcon sx={{ fontSize: 22 }} /> },
-          { label: 'Upload', path: '/upload', icon: <CloudUploadIcon sx={{ fontSize: 22 }} /> },
-        ]
+      ? [{ label: 'Library', path: '/library', icon: <LocalLibraryRoundedIcon sx={{ fontSize: 22 }} /> }]
       : []),
+    { label: 'Upload', path: '/upload', icon: <CloudUploadIcon sx={{ fontSize: 22 }} /> },
     ...(isAdmin
       ? [{ label: 'Admin', path: '/admin', icon: <AdminPanelSettingsRoundedIcon sx={{ fontSize: 22 }} /> }]
       : []),
@@ -160,14 +158,14 @@ export const Sidebar: React.FC = () => {
 
       {/* ══ MOBILE BOTTOM NAVIGATION BAR (Fixed bottom for mobile screens) ══ */}
       <MobileBottomNavContainer>
-        {navItems.slice(0, 4).map((item) => {
+        {navItems.map((item) => {
           const active = isActive(item.path);
           return (
             <NavItemBox
               key={item.path}
               active={active ? 1 : 0}
               onClick={() => navigate(item.path)}
-              sx={{ width: '52px', height: '52px' }}
+              sx={{ width: '50px', height: '52px', minWidth: '44px', flexShrink: 0 }}
             >
               {item.icon}
               <Typography
@@ -190,7 +188,7 @@ export const Sidebar: React.FC = () => {
           <NavItemBox
             onClick={handleMenuOpen}
             active={Boolean(anchorEl) ? 1 : 0}
-            sx={{ width: '52px', height: '52px' }}
+            sx={{ width: '50px', height: '52px', minWidth: '44px', flexShrink: 0 }}
           >
             <Avatar
               sx={{
@@ -211,7 +209,7 @@ export const Sidebar: React.FC = () => {
         ) : (
           <NavItemBox
             onClick={() => navigate('/login')}
-            sx={{ width: '52px', height: '52px' }}
+            sx={{ width: '50px', height: '52px', minWidth: '44px', flexShrink: 0 }}
           >
             <LoginRoundedIcon sx={{ fontSize: 20 }} />
             <Typography variant="caption" sx={{ fontSize: '0.62rem', fontWeight: 700, mt: 0.2 }}>

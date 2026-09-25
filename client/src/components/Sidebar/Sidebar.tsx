@@ -58,10 +58,7 @@ export const Sidebar: React.FC = () => {
       ? [{ label: 'Admin', path: '/admin', icon: <AdminPanelSettingsRoundedIcon sx={{ fontSize: 22 }} /> }]
       : []),
     ...(!isAuthenticated
-      ? [
-          { label: 'Sign In', path: '/login', icon: <LoginRoundedIcon sx={{ fontSize: 22 }} /> },
-          { label: 'Register', path: '/register', icon: <PersonAddRoundedIcon sx={{ fontSize: 22 }} /> },
-        ]
+      ? [{ label: 'Register', path: '/register', icon: <PersonAddRoundedIcon sx={{ fontSize: 22 }} /> }]
       : []),
   ];
 

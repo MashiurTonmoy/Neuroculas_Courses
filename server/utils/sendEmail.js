@@ -83,7 +83,10 @@ const sendEmail = async (options) => {
   // 3. Mailjet HTTPS API (Port 443)
   if (process.env.MAILJET_API_KEY && process.env.MAILJET_API_SECRET) {
     try {
-      const authHeader = 'Basic ' + Buffer.from(`${process.env.MAILJET_API_KEY}:${process.env.MAILJET_API_SECRET}`).toString('base64');
+      const apiKey = process.env.MAILJET_API_KEY.trim();
+      const apiSecret = process.env.MAILJET_API_SECRET.trim();
+      const authHeader = 'Basic ' + Buffer.from(`${apiKey}:${apiSecret}`).toString('base64');
+      
       const response = await fetch('https://api.mailjet.com/v3.1/send', {
         method: 'POST',
         headers: {
@@ -94,22 +97,33 @@ const sendEmail = async (options) => {
           Messages: [
             {
               From: {
-                Email: process.env.FROM_EMAIL || 'neuroculas@gmail.com',
+                Email: (process.env.FROM_EMAIL || 'neuroculas@gmail.com').trim(),
                 Name: process.env.FROM_NAME || 'Neuroculas Courses',
               },
-              To: [{ Email: options.to }],
+              To: [{ Email: options.to.trim() }],
               Subject: options.subject,
-              TextPart: options.text,
-              HTMLPart: options.html,
+              TextPart: options.text || '',
+              HTMLPart: options.html || '',
             },
           ],
         }),
       });
 
       const data = await response.json();
+
       if (!response.ok) {
-        console.error('❌ Mailjet Email Error:', data);
-        throw new Error('Failed to send email via Mailjet');
+        const errorMsg = data.ErrorMessage || data.message || JSON.stringify(data);
+        console.error('❌ Mailjet HTTP Error:', errorMsg);
+        throw new Error(`Mailjet Error (${response.status}): ${errorMsg}`);
+      }
+
+      // Mailjet returns HTTP 200 even for item-level errors inside Messages array
+      const msgStatus = data.Messages?.[0]?.Status;
+      if (msgStatus !== 'success') {
+        const errors = data.Messages?.[0]?.Errors;
+        const errDetail = errors ? errors.map(e => e.ErrorMessage).join('; ') : 'Mailjet failed to process message';
+        console.error('❌ Mailjet Message Error:', errDetail, JSON.stringify(data));
+        throw new Error(`Mailjet Delivery Error: ${errDetail}`);
       }
 
       console.log('✅ Email sent successfully via Mailjet HTTP API!');

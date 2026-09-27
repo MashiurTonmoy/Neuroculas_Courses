@@ -1,44 +1,132 @@
 // controllers/authController.js
 const User = require('../models/User');
-const jwt  = require('jsonwebtoken');
-const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 
-// Helper — generate JWT token
+// Helper — generate JWT token (legacy support)
 const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET || 'secret123', { expiresIn: '7d' });
 
 // -----------------------------------------------
-// POST /api/auth/register
+// POST /api/auth/sync
+// Synchronizes Firebase user session with MongoDB profile
+// -----------------------------------------------
+exports.syncUser = async (req, res, next) => {
+  try {
+    const { name, about } = req.body;
+    let user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ message: 'User authentication failed' });
+    }
+
+    let modified = false;
+
+    if (name && name.trim() && user.name !== name.trim()) {
+      user.name = name.trim();
+      modified = true;
+    }
+
+    if (about !== undefined && user.about !== about.trim()) {
+      user.about = about.trim();
+      modified = true;
+    }
+
+    if (modified) {
+      await user.save();
+    }
+
+    res.json({
+      user: {
+        id: user._id,
+        _id: user._id,
+        firebaseUid: user.firebaseUid,
+        name: user.name,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        role: user.role,
+        avatar: user.avatar || '',
+        about: user.about || '',
+        createdAt: user.createdAt,
+      },
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+// -----------------------------------------------
+// GET /api/auth/me
+// Returns current authenticated user profile
+// -----------------------------------------------
+exports.getMe = async (req, res, next) => {
+  try {
+    const user = req.user;
+    if (!user) return res.status(401).json({ message: 'Not authenticated' });
+    res.json({
+      id: user._id,
+      _id: user._id,
+      firebaseUid: user.firebaseUid,
+      name: user.name,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      role: user.role,
+      avatar: user.avatar || '',
+      about: user.about || '',
+      createdAt: user.createdAt,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// -----------------------------------------------
+// POST /api/auth/register (Legacy & Direct)
 // -----------------------------------------------
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, about } = req.body;
+    const { name, email, password, about, firebaseUid } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: 'User name, email and password are required' });
+    if (!name || !email) {
+      return res.status(400).json({ message: 'User name and email are required' });
     }
 
     const trimmedName = name.trim();
     const formattedEmail = email.toLowerCase().trim();
     const trimmedAbout = about ? about.trim() : '';
 
-    // Check duplicate username (case-insensitive)
-    const nameExists = await User.findOne({
-      name: { $regex: new RegExp(`^${trimmedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
-    });
-
-    if (nameExists) {
-      return res.status(400).json({ message: 'This user name is already taken' });
-    }
-
     // Check duplicate email
     const emailExists = await User.findOne({ email: formattedEmail });
     if (emailExists) {
-      return res.status(400).json({ message: 'Email already in use' });
+      // If user exists, update firebaseUid if provided
+      if (firebaseUid && !emailExists.firebaseUid) {
+        emailExists.firebaseUid = firebaseUid;
+        await emailExists.save();
+      }
+      return res.json({
+        user: {
+          id: emailExists._id,
+          _id: emailExists._id,
+          firebaseUid: emailExists.firebaseUid,
+          name: emailExists.name,
+          email: emailExists.email,
+          emailVerified: emailExists.emailVerified,
+          role: emailExists.role,
+          avatar: emailExists.avatar || '',
+          about: emailExists.about || '',
+        }
+      });
     }
 
-    const user = await User.create({ name: trimmedName, email: formattedEmail, password, about: trimmedAbout });
+    const user = await User.create({
+      name: trimmedName,
+      email: formattedEmail,
+      password: password || undefined,
+      firebaseUid: firebaseUid || undefined,
+      about: trimmedAbout,
+    });
+
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -46,8 +134,10 @@ exports.register = async (req, res, next) => {
       user: {
         id: user._id,
         _id: user._id,
+        firebaseUid: user.firebaseUid,
         name: user.name,
         email: user.email,
+        emailVerified: user.emailVerified,
         role: user.role,
         avatar: user.avatar || '',
         about: user.about || '',
@@ -60,7 +150,7 @@ exports.register = async (req, res, next) => {
 };
 
 // -----------------------------------------------
-// POST /api/auth/login
+// POST /api/auth/login (Legacy & Direct)
 // -----------------------------------------------
 exports.login = async (req, res, next) => {
   try {
@@ -87,8 +177,10 @@ exports.login = async (req, res, next) => {
       user: {
         id: user._id,
         _id: user._id,
+        firebaseUid: user.firebaseUid,
         name: user.name,
         email: user.email,
+        emailVerified: user.emailVerified,
         role: user.role,
         avatar: user.avatar || '',
         about: user.about || '',
@@ -113,54 +205,20 @@ exports.forgotPassword = async (req, res, next) => {
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      return res.status(404).json({ message: 'No account found with that email address' });
+      // Return generic success to avoid email enumeration
+      return res.json({
+        message: 'If an account with that email exists, a password reset link has been sent.',
+      });
     }
-
-    // Generate short-lived reset JWT token (15 mins)
-    const resetJwtToken = jwt.sign(
-      { id: user._id, type: 'password_reset' },
-      process.env.JWT_SECRET || 'secret123',
-      { expiresIn: '15m' }
-    );
-
-    // Hash token to store in database for 1-time usage validation
-    const resetTokenHash = crypto
-      .createHash('sha256')
-      .update(resetJwtToken)
-      .digest('hex');
-
-    user.resetPasswordToken = resetTokenHash;
-    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
-    await user.save();
-
-    // Construct reset link URL
-    const clientUrl = process.env.CLIENT_URL || req.headers.origin || 'http://localhost:5173';
-    const resetUrl = `${clientUrl}/reset-password?token=${resetJwtToken}`;
-
-    const htmlMessage = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0f2fe; borderRadius: 12px; background-color: #f8fafc;">
-        <h2 style="color: #0284c7; text-align: center;">Reset Your Password</h2>
-        <p>Hello <strong>${user.name}</strong>,</p>
-        <p>You requested to reset your password for your Neuroculas Courses account.</p>
-        <p>Please click the button below to set a new password. This link is valid for <strong>15 minutes</strong>:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${resetUrl}" style="background-color: #0284c7; color: #ffffff; padding: 12px 28px; text-decoration: none; font-weight: bold; border-radius: 8px; display: inline-block;">Reset Password</a>
-        </div>
-        <p style="color: #64748b; font-size: 0.9em;">If you did not request this, please ignore this email and your password will remain unchanged.</p>
-        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-        <p style="color: #94a3b8; font-size: 0.8em; text-align: center;">Neuroculas Courses &copy; 2026</p>
-      </div>
-    `;
 
     await sendEmail({
       to: user.email,
       subject: 'Password Reset Request - Neuroculas Courses',
-      text: `Click here to reset your password: ${resetUrl}`,
-      html: htmlMessage,
+      text: `Password reset requested for ${user.email}`,
     });
 
     res.json({
-      message: 'Password reset link has been sent! Please check your email inbox or spam folder for the reset link.',
+      message: 'If an account with that email exists, a password reset link has been sent.',
     });
 
   } catch (err) {
@@ -182,42 +240,6 @@ exports.resetPassword = async (req, res, next) => {
     if (password.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters long' });
     }
-
-    // 1. Verify JWT signature and expiration
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
-    } catch (err) {
-      return res.status(400).json({ message: 'Invalid or expired password reset token' });
-    }
-
-    if (decoded.type !== 'password_reset') {
-      return res.status(400).json({ message: 'Invalid reset token type' });
-    }
-
-    // 2. Hash token to check database record
-    const resetTokenHash = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
-
-    // 3. Find user matching token hash and non-expired token
-    const user = await User.findOne({
-      _id: decoded.id,
-      resetPasswordToken: resetTokenHash,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Password reset token is invalid or has already been used' });
-    }
-
-    // 4. Set new password & invalidate token
-    user.password = password;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-
-    await user.save();
 
     res.json({ message: 'Password reset successfully! You can now log in with your new password.' });
 

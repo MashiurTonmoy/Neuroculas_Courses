@@ -9,6 +9,9 @@ import { authService } from '../../services/authService';
 import { colors } from '../../theme/theme';
 import { AuthCardPaper } from '../LoginPage/LoginPage.styles';
 
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../config/firebase';
+
 export const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -28,6 +31,7 @@ export const ForgotPasswordPage: React.FC = () => {
       const res = await authService.forgotPassword(email);
       setSuccessMsg(res.message || 'Password reset link has been sent! Please check your email inbox or spam folder.');
     } catch (err: any) {
+      console.error('Forgot Password Error:', err);
       const msg = err.response?.data?.message || 'Failed to send password reset email. Please try again.';
       setError(msg);
     } finally {
@@ -95,9 +99,12 @@ export const ForgotPasswordPage: React.FC = () => {
               severity="success"
               sx={{ mb: 3, borderRadius: 2, textAlign: 'left', lineHeight: 1.6 }}
             >
-              <strong>Check your email!</strong>
-              <br />
-              {successMsg}
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#065f46', mb: 0.5 }}>
+                Check your email inbox or spam folder!
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#047857' }}>
+                Password reset link has been sent to your email address. Please check your <strong>inbox</strong> or <strong>spam folder</strong> to proceed.
+              </Typography>
             </Alert>
 
             <Button

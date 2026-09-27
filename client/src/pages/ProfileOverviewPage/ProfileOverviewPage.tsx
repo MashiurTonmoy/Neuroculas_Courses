@@ -12,7 +12,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Alert,
   IconButton,
 } from '@mui/material';
@@ -23,6 +22,7 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { FormField } from '../../components/FormField/FormField';
 import { useNavigate } from 'react-router-dom';
 import { useProfileOverviewPage } from './useProfileOverviewPage';
 import { ProfileHeaderPaper } from './ProfileOverviewPage.styles';
@@ -314,19 +314,18 @@ export const ProfileOverviewPage: React.FC = () => {
             >
               {editError && <Alert severity="error" sx={{ borderRadius: 3 }}>{editError}</Alert>}
 
-              <TextField
+              <FormField
                 label="User Name"
-                fullWidth
+                placeholder="Enter user name"
                 required
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 helperText="Must be unique across Neuroculas Courses"
               />
 
-              <TextField
+              <FormField
                 label="About / Bio (Optional)"
                 placeholder="Tell the community about your background, interests, or expertise..."
-                fullWidth
                 multiline
                 rows={4}
                 value={editAbout}

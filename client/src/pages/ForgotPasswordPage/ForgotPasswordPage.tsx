@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Alert, CircularProgress, Link } from '@mui/material';
+import { Box, Typography, Button, Alert, CircularProgress, Link } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import LockResetRoundedIcon from '@mui/icons-material/LockResetRounded';
 import MarkEmailReadRoundedIcon from '@mui/icons-material/MarkEmailReadRounded';
+import { FormField } from '../../components/FormField/FormField';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { colors } from '../../theme/theme';
@@ -116,14 +117,13 @@ export const ForgotPasswordPage: React.FC = () => {
           </Box>
         ) : (
           <form onSubmit={handleSubmit}>
-            <TextField
+            <FormField
               label="Email Address"
               type="email"
-              fullWidth
+              placeholder="Enter your email address"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              sx={{ mb: 3 }}
             />
 
             <Button

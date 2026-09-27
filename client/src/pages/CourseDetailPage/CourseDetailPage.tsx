@@ -9,7 +9,6 @@ import {
   Rating,
   Chip,
   CircularProgress,
-  TextField,
   Alert,
   Divider,
 } from '@mui/material';
@@ -24,6 +23,7 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import RateReviewRoundedIcon from '@mui/icons-material/RateReviewRounded';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
+import { FormField } from '../../components/FormField/FormField';
 import { useCourseDetailPage } from './useCourseDetailPage';
 import { EditCourseModal } from '../../components/EditCourseModal/EditCourseModal';
 import { Course } from '../../types/course';
@@ -296,14 +296,13 @@ export const CourseDetailPage: React.FC = () => {
                     />
                   </Box>
 
-                  <TextField
-                    label="Your review feedback..."
-                    fullWidth
+                  <FormField
+                    label="Your Review"
+                    placeholder="Write your review feedback..."
                     multiline
                     rows={3}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    sx={{ mb: 2.5 }}
                   />
 
                   <Button

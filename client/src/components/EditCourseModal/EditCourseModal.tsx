@@ -4,7 +4,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Button,
   Box,
   Typography,
@@ -20,6 +19,7 @@ import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import InsertDriveFileRoundedIcon from '@mui/icons-material/InsertDriveFileRounded';
+import { FormField } from '../FormField/FormField';
 import { Course } from '../../types/course';
 import { courseService } from '../../services/courseService';
 
@@ -106,21 +106,13 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({
           borderRadius: 5,
           border: '1.5px solid #BAE6FD',
           boxShadow: '0 20px 60px rgba(56, 189, 248, 0.20)',
-          p: 1,
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          '&::-webkit-scrollbar': {
-            display: 'none',
-            width: 0,
-            height: 0,
-          },
+          p: 0.5,
+          overflow: 'hidden',
         },
       }}
     >
       {/* ── Dialog Header ────────────────────────────────────────────── */}
-      <DialogTitle sx={{ pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <DialogTitle sx={{ pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, pt: 2.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box
             sx={{
@@ -156,35 +148,42 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({
           sx={{
             pt: 1,
             pb: 2,
+            px: 3,
             display: 'flex',
             flexDirection: 'column',
             gap: 2,
-            maxHeight: 'calc(85vh - 130px)',
+            maxHeight: 'calc(85vh - 120px)',
             overflowY: 'auto',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
             '&::-webkit-scrollbar': {
-              display: 'none',
-              width: 0,
-              height: 0,
+              width: '6px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: 'transparent',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#BFDBFE',
+              borderRadius: '4px',
+              '&:hover': {
+                background: '#38BDF8',
+              },
             },
           }}
         >
           {error && <Alert severity="error" sx={{ borderRadius: 3 }}>{error}</Alert>}
 
           {/* Title */}
-          <TextField
+          <FormField
             label="Title"
-            fullWidth
+            placeholder="Enter material title"
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
 
           {/* Description */}
-          <TextField
+          <FormField
             label="Description"
-            fullWidth
+            placeholder="Enter material description..."
             required
             multiline
             rows={3}
@@ -195,37 +194,35 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({
           <Grid container spacing={2}>
             {/* Price */}
             <Grid item xs={12} sm={6}>
-              <TextField
+              <FormField
                 label="Price (৳) — 0 for Free"
                 type="number"
-                fullWidth
+                placeholder="0"
                 value={price}
                 onChange={(e) => setPrice(Math.max(0, Number(e.target.value)))}
               />
             </Grid>
             {/* Language */}
             <Grid item xs={12} sm={6}>
-              <TextField
+              <FormField
                 select
                 label="Language"
-                fullWidth
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}
+                onChange={(e) => setLanguage(e.target.value as string)}
               >
                 {['English', 'Bangla', 'Spanish', 'French', 'German', 'Other'].map((lang) => (
                   <MenuItem key={lang} value={lang}>
                     {lang}
                   </MenuItem>
                 ))}
-              </TextField>
+              </FormField>
             </Grid>
           </Grid>
 
           {/* Tags */}
-          <TextField
+          <FormField
             label="Tags (comma-separated)"
             placeholder="e.g. math, calculus, notes, pdf"
-            fullWidth
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
@@ -248,20 +245,16 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: 1.25,
                     transition: 'all 0.2s ease',
                     boxShadow: visibility === 'public' ? '0 4px 12px rgba(56, 189, 248, 0.15)' : 'none',
                   }}
                 >
                   <LanguageRoundedIcon sx={{ color: visibility === 'public' ? '#0284C7' : '#94A3B8' }} />
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 800, color: visibility === 'public' ? '#0284C7' : '#475569' }}>
-                      Public
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block', lineHeight: 1.2, fontSize: '0.7rem' }}>
-                      Visible to everyone
-                    </Typography>
-                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 800, color: visibility === 'public' ? '#0284C7' : '#475569' }}>
+                    Public
+                  </Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
@@ -276,20 +269,16 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: 1.25,
                     transition: 'all 0.2s ease',
                     boxShadow: visibility === 'private' ? '0 4px 12px rgba(56, 189, 248, 0.15)' : 'none',
                   }}
                 >
                   <LockRoundedIcon sx={{ color: visibility === 'private' ? '#0284C7' : '#94A3B8' }} />
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 800, color: visibility === 'private' ? '#0284C7' : '#475569' }}>
-                      Private
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block', lineHeight: 1.2, fontSize: '0.7rem' }}>
-                      Only owner &amp; admin
-                    </Typography>
-                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 800, color: visibility === 'private' ? '#0284C7' : '#475569' }}>
+                    Private
+                  </Typography>
                 </Box>
               </Grid>
             </Grid>

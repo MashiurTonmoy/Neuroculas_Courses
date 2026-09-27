@@ -23,7 +23,7 @@ export const useExplorePage = () => {
         price: priceFilter || undefined,
         sort,
         page,
-        limit: 12,
+        limit: 6,
       });
       setCourses(res.courses);
       setTotalPages(res.totalPages);
@@ -44,6 +44,26 @@ export const useExplorePage = () => {
     }
   };
 
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setPage(1);
+  };
+
+  const handleLanguageChange = (lang: string) => {
+    setLanguage(lang);
+    setPage(1);
+  };
+
+  const handlePriceFilterChange = (price: 'free' | 'paid' | '') => {
+    setPriceFilter(price);
+    setPage(1);
+  };
+
+  const handleSortChange = (sortVal: 'latest' | 'rating') => {
+    setSort(sortVal);
+    setPage(1);
+  };
+
   useEffect(() => {
     fetchCourses();
   }, [searchQuery, language, priceFilter, sort, page]);
@@ -52,13 +72,13 @@ export const useExplorePage = () => {
     courses,
     loading,
     searchQuery,
-    setSearchQuery,
+    setSearchQuery: handleSearchChange,
     language,
-    setLanguage,
+    setLanguage: handleLanguageChange,
     priceFilter,
-    setPriceFilter,
+    setPriceFilter: handlePriceFilterChange,
     sort,
-    setSort,
+    setSort: handleSortChange,
     page,
     setPage,
     totalPages,

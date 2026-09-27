@@ -134,7 +134,7 @@ exports.forgotPassword = async (req, res, next) => {
     await user.save();
 
     // Construct reset link URL
-    const clientUrl = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
+    const clientUrl = process.env.CLIENT_URL || req.headers.origin || 'http://localhost:5173';
     const resetUrl = `${clientUrl}/reset-password?token=${resetJwtToken}`;
 
     const htmlMessage = `

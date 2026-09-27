@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Alert, CircularProgress, InputAdornment, IconButton } from '@mui/material';
+import { Box, Typography, Button, Alert, CircularProgress } from '@mui/material';
 import KeyRoundedIcon from '@mui/icons-material/KeyRounded';
-import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
-import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
+import { FormField } from '../../components/FormField/FormField';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { colors } from '../../theme/theme';
@@ -16,8 +15,6 @@ export const ResetPasswordPage: React.FC = () => {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,52 +132,22 @@ export const ResetPasswordPage: React.FC = () => {
           </Box>
         ) : (
           <form onSubmit={handleSubmit}>
-            <TextField
+            <FormField
               label="New Password"
-              type={showPassword ? 'text' : 'password'}
-              fullWidth
+              type="password"
+              placeholder="Enter new password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              sx={{ mb: 2.5 }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                      size="small"
-                      sx={{ color: colors.textSecondary }}
-                    >
-                      {showPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
             />
 
-            <TextField
+            <FormField
               label="Confirm New Password"
-              type={showConfirmPassword ? 'text' : 'password'}
-              fullWidth
+              type="password"
+              placeholder="Confirm new password"
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              sx={{ mb: 3 }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      edge="end"
-                      size="small"
-                      sx={{ color: colors.textSecondary }}
-                    >
-                      {showConfirmPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
             />
 
             <Button

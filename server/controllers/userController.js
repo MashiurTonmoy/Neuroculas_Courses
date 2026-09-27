@@ -7,7 +7,7 @@ const Course = require('../models/Course')
 // ----------------------------------------------------------
 exports.getUsers = async (req, res, next) => {
   try {
-    const { q, search } = req.query
+    const { q, search, page, limit } = req.query
     const searchTerm = (q || search || '').trim()
 
     let filter = {}
@@ -15,7 +15,23 @@ exports.getUsers = async (req, res, next) => {
       filter.name = { $regex: searchTerm, $options: 'i' }
     }
 
-    const users = await User.find(filter).select('-password').sort({ createdAt: -1 })
+    const totalUsers = await User.countDocuments(filter)
+
+    let query = User.find(filter).select('-password').sort({ createdAt: -1 })
+
+    let pageNum = 1
+    let limitNum = 10
+    let totalPages = 1
+
+    if (page || limit) {
+      pageNum = Math.max(1, parseInt(page, 10) || 1)
+      limitNum = Math.max(1, parseInt(limit, 10) || 10)
+      totalPages = Math.ceil(totalUsers / limitNum) || 1
+      const skip = (pageNum - 1) * limitNum
+      query = query.skip(skip).limit(limitNum)
+    }
+
+    const users = await query
 
     // Calculate file upload count for each user
     const userIds = users.map(u => u._id)
@@ -40,6 +56,15 @@ exports.getUsers = async (req, res, next) => {
       createdAt: user.createdAt,
       uploadCount: countMap[user._id.toString()] || 0
     }))
+
+    if (page || limit) {
+      return res.json({
+        users: result,
+        totalUsers,
+        totalPages,
+        page: pageNum,
+      })
+    }
 
     res.json(result)
   } catch (err) {

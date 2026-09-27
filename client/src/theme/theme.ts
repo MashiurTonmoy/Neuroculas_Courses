@@ -192,12 +192,32 @@ export const theme = createTheme({
     MuiTextField: {
       styleOverrides: {
         root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 10,
+            backgroundColor: '#FFFFFF',
+          },
           '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.border },
           '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.primaryLight },
-          '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: colors.primary },
+          '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: colors.primary, borderWidth: '1.5px' },
           '& .MuiInputLabel-root': { color: colors.textSecondary },
           '& .MuiInputLabel-root.Mui-focused': { color: colors.primary },
-          '& .MuiInputBase-input': { color: colors.textMain },
+          '& .MuiInputBase-input': { color: colors.textMain, fontSize: '0.95rem' },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+          backgroundColor: '#FFFFFF',
+          '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.border },
+          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: colors.primaryLight },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: colors.primary, borderWidth: '1.5px' },
+        },
+        input: {
+          fontSize: '0.95rem',
+          color: colors.textMain,
+          '&::placeholder': { color: '#9CA3AF', opacity: 1 },
         },
       },
     },

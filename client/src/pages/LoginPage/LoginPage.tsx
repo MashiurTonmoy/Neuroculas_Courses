@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, Typography, TextField, Button, Alert, CircularProgress, Link } from '@mui/material';
+import { Box, Typography, Button, Alert, CircularProgress, Link } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
+import { FormField } from '../../components/FormField/FormField';
 import { useLoginPage } from './useLoginPage';
 import { AuthCardPaper } from './LoginPage.styles';
 import { colors } from '../../theme/theme';
@@ -59,24 +60,22 @@ export const LoginPage: React.FC = () => {
         {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
         <form onSubmit={handleSubmit}>
-          <TextField
-            label="Email Address"
+          <FormField
+            label="Username / Email"
             type="email"
-            fullWidth
+            placeholder="Enter your username or email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            sx={{ mb: 2 }}
           />
 
-          <TextField
+          <FormField
             label="Password"
             type="password"
-            fullWidth
+            placeholder="Enter your password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            sx={{ mb: 1 }}
           />
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2.5 }}>

@@ -6,6 +6,21 @@ export const StyledDialogContent = styled(DialogContent)(() => ({
   backgroundColor: colors.bgCard,
   color: colors.textMain,
   padding: '24px 32px',
+  maxHeight: 'calc(85vh - 120px)',
+  overflowY: 'auto',
+  '&::-webkit-scrollbar': {
+    width: '6px',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: 'transparent',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: '#BFDBFE',
+    borderRadius: '4px',
+    '&:hover': {
+      background: colors.primary,
+    },
+  },
 }));
 
 export const DropZoneBox = styled(Box)(() => ({

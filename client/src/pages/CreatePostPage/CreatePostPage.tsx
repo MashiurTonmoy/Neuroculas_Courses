@@ -3,7 +3,6 @@ import {
   Container,
   Typography,
   Box,
-  TextField,
   Button,
   Alert,
   CircularProgress,
@@ -14,6 +13,7 @@ import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
+import { FormField } from '../../components/FormField/FormField';
 import { useCreatePostPage } from './useCreatePostPage';
 import { FormCardPaper } from './CreatePostPage.styles';
 import { FileTypeIcon, getFileType, FILE_TYPE_CONFIG } from '../../components/FileTypeIcon/FileTypeIcon';
@@ -162,55 +162,51 @@ export const CreatePostPage: React.FC = () => {
               </label>
             </Box>
 
-            <TextField
+            <FormField
               label="Course / File Title"
-              fullWidth
+              placeholder="Enter course or file title"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              sx={{ mb: 2.5 }}
             />
 
-            <TextField
+            <FormField
               label="Description"
-              fullWidth
+              placeholder="Enter course description details..."
               required
               multiline
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              sx={{ mb: 2.5 }}
             />
 
-            <Box sx={{ display: 'flex', gap: 2, mb: 2.5 }}>
-              <TextField
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <FormField
                 label="Price (BDT ৳)"
                 type="number"
-                fullWidth
+                placeholder="0"
                 value={price}
                 onChange={(e) => handlePriceChange(e.target.value)}
                 helperText={priceNotice || "For now, share your course for free."}
                 FormHelperTextProps={{ sx: { color: priceNotice ? colors.error : colors.primary, fontWeight: 700 } }}
               />
-              <TextField
+              <FormField
                 select
                 label="Language"
-                fullWidth
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}
+                onChange={(e) => setLanguage(e.target.value as string)}
               >
                 <MenuItem value="English">English</MenuItem>
                 <MenuItem value="Bangla">Bangla</MenuItem>
                 <MenuItem value="Spanish">Spanish</MenuItem>
-              </TextField>
+              </FormField>
             </Box>
 
-            <TextField
-              label="Tags (comma separated, e.g. React, Node, Web)"
-              fullWidth
+            <FormField
+              label="Tags"
+              placeholder="e.g. React, Node, Web"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              sx={{ mb: 3 }}
             />
 
             {/* Visibility Selector */}
@@ -231,19 +227,15 @@ export const CreatePostPage: React.FC = () => {
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'center',
                       gap: 1.5,
                       transition: 'all 0.2s ease',
                     }}
                   >
                     <LanguageRoundedIcon sx={{ color: visibility === 'public' ? colors.primaryDark : colors.textSecondary }} />
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 800, color: colors.textMain }}>
-                        Public
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: colors.textSecondary, display: 'block', fontSize: '0.72rem' }}>
-                        Visible to everyone
-                      </Typography>
-                    </Box>
+                    <Typography variant="body2" sx={{ fontWeight: 800, color: colors.textMain }}>
+                      Public
+                    </Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
@@ -258,19 +250,15 @@ export const CreatePostPage: React.FC = () => {
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
+                      justifyContent: 'center',
                       gap: 1.5,
                       transition: 'all 0.2s ease',
                     }}
                   >
                     <LockRoundedIcon sx={{ color: visibility === 'private' ? colors.primaryDark : colors.textSecondary }} />
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 800, color: colors.textMain }}>
-                        Private
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: colors.textSecondary, display: 'block', fontSize: '0.72rem' }}>
-                        Only you &amp; admin
-                      </Typography>
-                    </Box>
+                    <Typography variant="body2" sx={{ fontWeight: 800, color: colors.textMain }}>
+                      Private
+                    </Typography>
                   </Box>
                 </Grid>
               </Grid>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -11,26 +11,39 @@ import {
   Pagination,
   Chip,
   Button,
+  Tabs,
+  Tab,
+  Paper,
+  Avatar,
+  ClickAwayListener,
+  List,
+  ListItem,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import ExploreRoundedIcon from '@mui/icons-material/ExploreRounded';
 import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
+import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 import { useExplorePage } from './useExplorePage';
 import { useUsersPage } from '../UsersPage/useUsersPage';
 import { CourseCard } from '../../components/CourseCard/CourseCard';
 import { EditCourseModal } from '../../components/EditCourseModal/EditCourseModal';
+import { UserCard } from '../../components/UserCard/UserCard';
 import { Course } from '../../types/course';
+import { courseService } from '../../services/courseService';
 import { FilterBarPaper, SearchInputBox } from './ExplorePage.styles';
 import { colors } from '../../theme/theme';
-import { Tabs, Tab, Paper, Avatar } from '@mui/material';
-import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 
 export const ExplorePage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState(0);
   const [editingCourse, setEditingCourse] = React.useState<Course | null>(null);
+
+  // Search Autocomplete Suggestion Pool
+  const [allSuggestionsPool, setAllSuggestionsPool] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   const {
     courses,
     loading,
@@ -55,7 +68,37 @@ export const ExplorePage: React.FC = () => {
     searchQuery: userSearchQuery,
     setSearchQuery: setUserSearchQuery,
     loading: usersLoading,
+    page: userPage,
+    setPage: setUserPage,
+    totalPages: userTotalPages,
   } = useUsersPage();
+
+  useEffect(() => {
+    const loadSuggestionsPool = async () => {
+      try {
+        const res = await courseService.getCourses({ limit: 100 });
+        const itemsSet = new Set<string>();
+        res.courses.forEach((c) => {
+          if (c.title) itemsSet.add(c.title);
+          if (Array.isArray(c.tags)) {
+            c.tags.forEach((t) => {
+              if (t && t.trim()) itemsSet.add(t.trim());
+            });
+          }
+        });
+        setAllSuggestionsPool(Array.from(itemsSet));
+      } catch (err) {
+        console.error('Failed to load suggestion pool', err);
+      }
+    };
+    loadSuggestionsPool();
+  }, []);
+
+  const filteredSuggestions = searchQuery.trim()
+    ? allSuggestionsPool.filter((item) =>
+        item.toLowerCase().includes(searchQuery.trim().toLowerCase())
+      ).slice(0, 8)
+    : [];
 
   return (
     <Box sx={{ bgcolor: 'transparent', minHeight: '100vh', py: 5 }}>
@@ -149,16 +192,70 @@ export const ExplorePage: React.FC = () => {
             <FilterBarPaper elevation={0}>
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} md={5}>
-                  <SearchInputBox>
-                    <SearchRoundedIcon sx={{ color: colors.primary, mr: 1, fontSize: 20 }} />
-                    <InputBase
-                      placeholder="Search files by title, tags or topic..."
-                      fullWidth
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      sx={{ color: colors.textMain, fontSize: '0.9rem' }}
-                    />
-                  </SearchInputBox>
+                  <ClickAwayListener onClickAway={() => setShowSuggestions(false)}>
+                    <Box sx={{ position: 'relative' }}>
+                      <SearchInputBox>
+                        <SearchRoundedIcon sx={{ color: colors.primary, mr: 1, fontSize: 20 }} />
+                        <InputBase
+                          placeholder="Search files by title, tags or topic..."
+                          fullWidth
+                          value={searchQuery}
+                          onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setShowSuggestions(true);
+                          }}
+                          onFocus={() => setShowSuggestions(true)}
+                          sx={{ color: colors.textMain, fontSize: '0.9rem' }}
+                        />
+                      </SearchInputBox>
+
+                      {showSuggestions && searchQuery.trim().length > 0 && filteredSuggestions.length > 0 && (
+                        <Paper
+                          elevation={6}
+                          sx={{
+                            position: 'absolute',
+                            top: 'calc(100% + 6px)',
+                            left: 0,
+                            right: 0,
+                            zIndex: 100,
+                            bgcolor: '#FFFFFF',
+                            border: `1px solid ${colors.border}`,
+                            borderRadius: 3,
+                            boxShadow: '0 12px 32px rgba(96,165,250,0.20)',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <List disablePadding>
+                            {filteredSuggestions.map((item, idx) => (
+                              <ListItem
+                                key={idx}
+                                component="div"
+                                onClick={() => {
+                                  setSearchQuery(item);
+                                  setShowSuggestions(false);
+                                }}
+                                sx={{
+                                  py: 1.25,
+                                  px: 2,
+                                  cursor: 'pointer',
+                                  borderBottom: idx !== filteredSuggestions.length - 1 ? `1px solid ${colors.bgSoft}` : 'none',
+                                  '&:hover': { bgcolor: colors.veryLight },
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 1.5,
+                                }}
+                              >
+                                <SearchRoundedIcon sx={{ fontSize: 18, color: colors.primary }} />
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: colors.textMain }}>
+                                  {item}
+                                </Typography>
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Paper>
+                      )}
+                    </Box>
+                  </ClickAwayListener>
                 </Grid>
 
                 <Grid item xs={6} sm={3} md={2.5}>
@@ -335,90 +432,28 @@ export const ExplorePage: React.FC = () => {
             ) : (
               <Box>
                 {users.map((u) => (
-                  <Paper
+                  <UserCard
                     key={u._id || u.id}
+                    user={u}
                     onClick={() => navigate(`/profile/${u._id || u.id}`)}
-                    elevation={0}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      px: 3,
-                      py: 1.75,
-                      mb: 1.5,
-                      bgcolor: colors.bgCard,
-                      borderRadius: 3,
-                      border: `1px solid ${colors.border}`,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease-in-out',
-                      '&:hover': {
-                        borderColor: colors.primary,
-                        bgcolor: colors.soft,
-                        boxShadow: '0 4px 16px rgba(96,165,250,0.15)',
-                        transform: 'translateY(-1px)',
-                      },
-                    }}
-                  >
-                    {/* Single line Left: User Logo/Avatar + Name */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
-                      <Avatar
-                        src={u.avatar}
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
-                          color: '#FFF',
-                          fontWeight: 800,
-                          fontSize: '1rem',
-                          boxShadow: '0 4px 12px rgba(96,165,250,0.25)',
-                        }}
-                      >
-                        {u.name ? u.name[0].toUpperCase() : 'U'}
-                      </Avatar>
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            fontWeight: 700,
-                            color: colors.textMain,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}
-                        >
-                          {u.name}
-                        </Typography>
-                        {u.role === 'admin' && (
-                          <Chip
-                            label="Admin"
-                            size="small"
-                            sx={{
-                              height: 18,
-                              fontSize: '0.65rem',
-                              bgcolor: colors.soft,
-                              color: colors.primaryDark,
-                              fontWeight: 700,
-                              mt: 0.25,
-                            }}
-                          />
-                        )}
-                      </Box>
-                    </Box>
+                  />
+                ))}
 
-                    {/* Single line Right: Upload Count */}
-                    <Chip
-                      label={`${u.uploadCount} file${u.uploadCount !== 1 ? 's' : ''} uploaded`}
+                {userTotalPages > 1 && (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5, mb: 2 }}>
+                    <Pagination
+                      count={userTotalPages}
+                      page={userPage}
+                      onChange={(_, val) => setUserPage(val)}
+                      size="small"
+                      shape="rounded"
                       sx={{
-                        bgcolor: u.uploadCount > 0 ? '#DCFCE7' : colors.veryLight,
-                        color: u.uploadCount > 0 ? '#15803D' : colors.textSecondary,
-                        fontWeight: 700,
-                        fontSize: '0.82rem',
-                        px: 1,
-                        height: 32,
+                        '& .MuiPaginationItem-root': { color: colors.textSecondary, borderColor: colors.border },
+                        '& .Mui-selected': { bgcolor: `${colors.primary} !important`, color: '#FFF', fontWeight: 800 },
                       }}
                     />
-                  </Paper>
-                ))}
+                  </Box>
+                )}
               </Box>
             )}
           </>
